@@ -82,6 +82,6 @@ We want to look at patients with continuous health insurance claims from 2012-20
 \subsubsection{Tests}
 
 Eventually, we would like to implement a method that infer what state the patient is in (diabetic, non-diabetic) as a latent variable. Using a hidden markov model, information about the observables of a patient at an earlier time can be used to infer what "state" the patient is in at later times or what state they were in at earlier times. We can employ this technique in intervals of years or whatever the smallest continuous increment of health insurance claims are with a viable data set size.
-
+The quality of this model can be measured using the forward and backward algorithms on test data to maximize likelihood.
 
 \end{document}
