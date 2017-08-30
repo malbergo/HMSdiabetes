@@ -1,0 +1,427 @@
+\documentclass[11pt,titlepage]{article}
+\usepackage{graphicx}
+\usepackage{times,psfig,epsfig}
+%\hoffset-1in
+%\voffset-1in
+\oddsidemargin2.0cm
+\evensidemargin2cm
+\textheight23cm
+\textwidth7in
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus2pt minus1pt}
+\renewcommand{\topfraction}{0.99}
+\renewcommand{\bottomfraction}{0.99} 
+\renewcommand{\textfraction}{0.01}
+\renewcommand{\arraystretch}{1.5}
+
+\def\argmax{\mathop {\rm argmax}}
+
+\fboxsep2mm
+\sloppy
+\topsep0pt
+
+\begin{document}
+\LARGE
+
+\raggedright
+
+\begin{center}
+{\bf
+{\huge \bf Hidden Markov Models in Language Processing}\\[0.1in]
+Dustin Hillard\\[0.1in]
+Lecture notes courtesy of Prof. Mari Ostendorf\\[0.1in]
+}
+\end{center}
+\vskip 0.3in
+
+Outline
+\begin{itemize}
+\item Review of Markov models
+\item What is an HMM?
+\item Examples
+\item General idea of hidden variables:\\
+	implications for inference and estimation
+\item Back to HMM details: the key questions
+\item Hidden-event language models
+\end{itemize}
+
+Goals: To understand the assumptions behind an HMM, so that you can
+decide when the model makes sense and when extensions make sense as well
+as the cost of extensions. 
+
+\clearpage
+
+
+%\centerline{\vrule width3in height1pt}
+%\vskip 0.2in
+\centerline{{\huge \bf Review: Markov Models}}
+\vskip 0.3in
+
+The next state $s_{i+1}$ is conditionally independent of the past
+given the current state $s_i$:
+$$p(s_1,\ldots , s_T) = p(s_1)\prod_{i=2}^T p(s_i|s_1,\ldots ,s_{i-1})
+  = p(s_1)\prod_{i=2}^T p(s_i|s_{i-1}) $$
+
+{\bf Illustration of Topology}
+
+State topology pictures depict constraints on transitions, i.e. the
+allowable transitions in the state space with circles corresponding to
+state values.  Two examples below are for:
+\begin{itemize} 
+\item a fully connected state space (as in a letter bigram with non-zero
+probabilities), and 
+\includegraphics{alphabet.pdf}
+%% a circle for each letter, with all circles connected to each other
+\item a strictly ordered model (as in the left-to-right
+model used in speech acoustic models).
+\includegraphics{states.pdf}
+%% a circle for each state, with left to right connections (as well as
+%% self loops)
+\end{itemize}
+
+\vskip 1.5in
+
+{\bf Graphical Model Illustration of Time-Sequence}
+
+The picture below could apply for any topology.  Each circle is a random
+variable $S_i$ at a particular time $i$.
+\includegraphics{mm.pdf}
+%% graphical model of Markov Model, left to right, each connected with
+%% a directional arrow
+
+\clearpage
+
+\centerline{{\huge \bf Hidden Markov Models (HMMs)}}
+\vskip 0.2in
+
+In an HMM, we observe a sequence ${\bf o} = o_1, \ldots , o_T$
+that is associated with a state sequence that we cannot observe
+ ${\bf s} = s_1, \ldots , s_T$.  The model describes the joint state
+and observation sequence:
+$$p(s_1,\ldots , s_T, o_1,\ldots , o_T)
+  = p(s_1)p(o_1|s_1)\prod_{i=2}^T p(s_i|s_{i-1})p(o_i|s_i) $$
+and we get the probability of the observation sequence by marginalizing:
+$$p(o_1, \ldots , o_T) = \sum_{{\bf s}} p(o_1, \ldots , o_T,s_1, \ldots , s_T )$$
+
+The key assumptions in an HMM are:
+\begin{itemize}
+\item The state sequence is Markov: $p(s_i|s_1,\ldots , s_{i-1}) = p(s_i|s_{i-1})$
+\item The observations are conditionally independent of future and
+past states and observations given the current state:
+$p(o_i|s_1,\ldots ,s_T,o_1,\ldots , o_{i-1},o_{i+1},\ldots , o_T) =
+p(o_i|s_i)$
+\end{itemize}
+
+\begin{quote}
+{\Large \em Aside: there are two types of HMMs, labeled states ($p(o_i|s_i)$)
+and labeled transitions ($p(o_i|s_{i-1},s_i)$).  You can convert from one
+to another, so we will stick with the simpler and more popular labeled-state
+HMM framework.}
+\end{quote}
+
+\clearpage
+
+We can extend the illustrations of Markov models to HMMs below.
+
+{\bf Illustration of Topology}
+
+Using only the strictly ordered model for simplicity, each circle is a
+possible value in the state space as before but we add dashed arrows
+to indicate generation of an observation.
+\includegraphics{hmmtop.pdf}
+% same as markov, but with dotted line to emitted states
+
+\vskip 3in
+
+{\bf Graphical Model Illustration of Time-Sequence}
+
+Again, the picture below could apply for any topology.  Each empty
+circle is a random variable $S_i$ at a particular time $i$, and each full 
+circle is a random variable $O_i$ at time $i$.
+\includegraphics{hmmgm.pdf}
+%% graphical model rep of HMM, states are connected left to right, and
+%% each emit an observation that is indep. of all other states
+
+\clearpage
+
+\centerline{{\huge \bf HMM Examples in Language Processing}}
+\vskip 0.2in
+
+Some examples include part-of-speech tagging, identification of named entities
+in text, punctuation prediction, recognition of speech acts, \ldots  More
+details for the first examples below.
+
+\vskip 0.2in
+{\bf Part-of-speech (POS) Tagging}
+
+\begin{itemize}
+\item States are POS tags, $p(s_i|s_{i-1})$ describes POS sequence tendencies 
+\item Observations are words, $p(o_i|s_i)$ describes word-tag relations
+\end{itemize}
+
+\begin{quote}
+$o_1, o_2, o_3, o_4 = $ I saw the boy\\
+$s_1, s_2, s_3, s_4 = $ pronoun verb det noun
+\end{quote}
+
+It might be useful to have more complex representations of the words
+as observations to better model unknown words, i.e.  $o_i$ not in a
+known vocabulary, since the observation space needs to be finite in
+order to specify $p(o_i|s_i)$.  Consider possible observation
+sequences:
+
+\begin{quote}
+I saw the zlrxl\\
+Twas brillig and the slithy toves did gyre and ...
+\end{quote}
+
+We would probably say that {\sl zlrxl} is a noun, {\sl slithy} is an
+adjective, and {\sl toves} is a plural noun, based on endings of the
+words and/or neighboring POS types.  So, we might want to expand $o_i$ to
+a vector with the word, ending, capitalization, etc as elements of the 
+observation vector.  
+
+\vskip 0.2in
+
+{\Large \em Aside: There are some limitations of an HMM for POS tagging, so
+extensions or other models are more often used.
+For example, the POS tag might be
+better predicted by using the previous word and not just the previous tag, 
+e.g. some verbs do not take a direct object.
+}
+
+\clearpage
+
+{\bf Name Recognition}
+
+\begin{itemize}
+\item States include $\{$begin\_person (BP), cont\_person (CP), begin\_location (BL),
+cont\_location (CL), not\_a\_name ($\phi$)$\}$ , $p(s_i|s_{i-1})$ describes name sequence tendencies 
+\item Observations are words, $p(o_i|s_i)$ describes word-name relations
+\end{itemize}
+
+\begin{quote}
+$o_1, o_2, o_3, o_4, o_5, o_6, o_7 = $ We saw Senator Pat Johnson in Boston.\\
+$s_1, s_2, s_3, s_4, s_5, s_6, s_7 = $ $\phi$ $\phi$ $\phi$ BP\ CP $\phi$ BL
+\end{quote}
+
+Again, it might be useful to have features for characterizing new
+words, and it might be useful to condition the predicted state and/or
+observation on both the previous word and state:
+$ p(s_i|s_{i-1},o_{i-1});\ p(o_i|s_i,o_{i-1})$
+
+\vskip 0.2in
+{\bf Other sequence labeling problems \ldots}
+
+\begin{itemize}
+\item Sentence segmentation: sequence of boundary vs. no\_boundary decisions
+after every word
+\item Topic segmentation: sequence of boundary vs. no\_boundary decisions after
+every sentence
+\item Speech act tagging on the sequence of utterances in a conversation
+\item \ldots
+\end{itemize}
+
+\clearpage
+
+\centerline{{\LARGE \bf Hidden Variables}}
+\vskip 0.2in
+
+Hidden variables are useful for:
+\begin{itemize}
+\item modeling different sources of
+variability, e.g. temporal variability in an
+HMM, multimodal behavior in a mixture model (some random event that I can't
+observe determines the distribution), OR
+\item the hidden variables may be what you want to detect (as in tagging),
+\item learning distributions where some values are missing, as in missing labels for semi-supervised learning.
+\end{itemize}
+
+Key points in working with hidden variables:
+\begin{itemize}
+\item Computing P(observations) requires marginalizing (summing out)
+hidden states.  
+\item Parameter estimation is iterative, e.g. the EM algorithm
+for maximum likelihood estimation.
+\end{itemize}
+
+\clearpage
+
+\centerline{{\LARGE \bf The EM Algorithm}}
+\vskip 0.2in
+
+Given training data ${\cal X} = \{ x_1, \ldots , x_T\}$ and model 
+$p(x,s|\theta)$, the maximum likelihood parameter estimate requires
+$$\argmax_\theta \log p({\cal X}|\theta) = 
+    \argmax_\theta \sum_{i=1}^T\log \sum_s p(x_i,s|\theta)$$
+where the sum over the hidden variable complicates the solution.
+\vskip 0.2in
+
+Basic idea: directly maximizing log likelihood 
+$\log p({\cal X}|\theta)$ is too hard, but can maximize 
+$E[\log p({\cal X},{\cal S})|{\cal X},\theta)]$ and indirectly maximize 
+log likelihood. Still no closed form solution though, need to:
+
+Iterate:
+\begin{description}
+\item[E-step:] Find $Q(\theta |\theta^{(l)}) = E[\log p({\cal X},{\cal S})|{\cal X},\theta^{(l)}]$
+\item[M-step:] Find $\theta^{(l+1)} = \argmax_\theta Q(\theta |\theta^{(l)})$
+\end{description}
+
+\vskip 0.4in
+For problems involving $p(x,s)$ in the exponential family (most everything we work with), the EM algorithm reduces to:
+\begin{description}
+\item[E-step:] Find expected sufficient statistics $E[t^{(l)}]$ of unobserved process.
+\item[M-step:] Use these in place of $t$ in the ML update formulas for $\theta^{(l+1)}$.
+\end{description}
+
+\vskip 0.4in
+For many discrete hidden variable problems, the E-step involves 
+estimating the probabilities for different possible state values:
+$$\gamma_t^{(l)}(j) = p(s_t = j|x,\theta^{(l)})$$
+
+\clearpage
+
+{\bf EM for Mixtures}
+
+In a mixture distribution, the index of the underlying
+mode is the hidden variable:
+$$p(x) = \sum_{i=1}^m \lambda_i p_i(x) = \sum_{i=1}^m p(z=i) p(x|z=i)$$
+
+Initialize: Provide $\{\lambda_i^{(0)},p_j^{(0)}(x)\}$\\
+Iterate: 
+\begin{description}
+\item[E-step]: Compute $\gamma_t^{(l)}(j) = p(z_t = j|x_t,\theta^{(l)}) = 
+  p^{(l)}(z_t = j,x_t)/[\sum_k p^{(l)}(z_t = k,x_t)] $
+
+\item[M-step:] Update component model parameters using $\gamma_t$-weighted 
+observation statistics and update mixture weights using:
+$$\lambda_j^{(l+1)} = \frac{1}{T}\sum_t \gamma_t^{(l)}(j)$$
+{\Large \sl (Essentially a relative frequency estimate using 
+weighted counts.)}
+\end{description}
+
+\vskip 0.2in
+
+The mixture estimation algorithm works for all types of mixtures, with
+the difference being in the details of how the distributions $p_i(x)$
+are estimated.  Important examples include:
+\begin{itemize}
+\item Mixtures of language models (for topic and genre modeling)\\
+use weighted n-gram counts, e.g.
+  $$c(w_a) = \sum_{t:w_t=w_a} \gamma_t(j)$$
+\item Gaussian mixtures
+$$n_j = \sum_t \gamma_t(j); \quad \mu_j=\frac{1}{n_j}\sum_t \gamma_t(j)x_t; \quad \sigma^2_j=\frac{1}{n_j}\sum_t\gamma_t(j)(x_t-\mu_j)^2$$
+\end{itemize}
+where I've dropped the $(l)$ superscript to simplify the notation.
+
+\vskip 0.1in
+
+Note: You can also keep the mixture components fixed and just estimate the mixture weights if the components come from other training data.
+
+\clearpage
+
+{\bf EM for HMMs}
+
+\vskip 0.2in
+
+Define HMM parameters: $\pi_j = p(s_1=j);\ a_{jk}=p(s_i=k|s_{i-1}=j);\
+b_j(o) = p(o|s_t=j)$
+
+\vskip 0.2in
+
+E-step: Compute 
+$$\gamma_t^{(l)}(j) = p(s_t = j|o_1,\ldots ,o_T,\theta^{(l)})$$
+$$\xi_t^{(l)}(j,k) = p(s_{t-1} = j, s_{t}=k|o_1,\ldots ,o_T,\theta^{(l)})$$
+
+M-step: Update component model parameters using $\gamma_t$-weighted 
+observation statistics and update transitions using $\xi_t$ terms.
+
+\vskip .2in
+
+Using the same weighted counts idea as for mixtures:
+$$a_{jk}^{(l+1)} = \frac{\sum_t \xi_t^{(l)}(j,k)}{\sum_k \sum_t \xi_t^{(l)}(j,k)}$$
+
+The update for $\pi_j$ is similar, and the update for the observation
+distribution depends on the form of $b_j(o)$ but also uses weighted observations(continuous $o$) or weighted counts (discrete $o$).
+
+\vskip .2in
+
+The model-related details are primarily in the E-Step, which is more
+complicated than the mixture model because of the sequential dependencies.
+So now, let's go back to the details of the HMM.
+
+%\centerline{\vrule width3in height1pt}
+%\vskip 0.2in
+
+\clearpage
+\centerline{{\huge \bf Details for HMMs}}
+\vskip 0.3in
+
+Questions people ask about HMMs:
+\begin{enumerate}
+\item How do you compute $p({\bf o})$?
+\item What is the most likely state sequence $\argmax_{\bf s} p({\bf s}|{\bf o})$ ?
+\item What is the most likely state at a particular time $t$,  $\argmax_j p(s_t=j|{\bf o})$ ?
+\item How do you estimate the parameters of an HMM?
+\end{enumerate}
+
+\vskip 0.2in
+
+Three key algorithms needed to answer the questions
+\begin{itemize}
+\item Forward algorithm:
+$$\alpha_t(k) = p(o_1,\ldots , o_t,s_t=j) = \sum_j \alpha_{t-1}(j) a_{jk}b_k(o_t)$$
+\item Viterbi algorithm:
+$$\delta_t(k) = \max_{s_1,\ldots , s_{t-1}} p(o_1,\ldots , o_t,s_1,\ldots , s_{t-1},s_t=k)
+ = \max_j \delta_{t-1}(j) a_{jk}b_k(o_t)$$
+\item Backward algorithm: 
+$$\beta_t(j) = p(o_{t+1},\ldots , o_T|s_t=j) = \sum_k \beta_{t+1}(k) a_{jk}b_k(o_{t+1})$$
+\end{itemize}
+
+\clearpage
+
+These algorithms answer the questions as follows:
+\begin{enumerate}
+\item Use the forward algorithm: 
+$$p({\bf o})=p(o_1,\ldots ,o_T)=\sum_j p(o_1,\ldots ,o_T,s_T=j)=\sum_j \alpha_T(j)=\alpha_T$$
+\item Use the Viterbi algorithm, keeping track of the max $j$ at each time step, then traceback from the final best state.
+\item Use the forward and backward algorithms to find
+\begin{eqnarray*}
+\gamma_t(j) & = & p(s_t = j|o_1,\ldots ,o_T) = p(s_t = j,o_1,\ldots ,o_T)/p({\bf o})\\
+  & = & \alpha_t(j)\beta_t(j)/\alpha_T
+\end{eqnarray*}
+and use $\gamma_t(j)=p(s_t=j|{\bf o})$ in finding the argmax.
+\item Use the forward and backward algorithms in the E-step to find $\gamma_t(j)$ as above and
+\begin{eqnarray*}
+\xi_t(j,k) & = &  p(s_{t-1} = j, s_t=k|o_1,\ldots ,o_T)  \\
+  & = & \alpha_t(j)a_{jk}b_k(o_{t+1})\beta_{t+1}(k)/\alpha_T
+\end{eqnarray*}
+\end{enumerate}
+
+\clearpage
+
+\centerline{{\huge \bf Hidden-Event Language Models}}
+\vskip 0.2in
+
+Hidden-event language models represent a hidden event $e_i$ (such as a
+sentence or topic boundary) after every word $w_i$. It is a bit like
+an HMM because the hidden event, but the observations are based on n-gram
+language models. The bigram case would be:
+\begin{eqnarray*}
+p({\bf w},{\bf e}) & = & p(w_1,e_1, w_2,e_2, \ldots , w_T,e_T)\\
+ & = & p(e_1|w_1)p(w_1)\prod_t p(e_t|w_t,w_{t-1},e_{t-1})p(w_t|w_{t-1},e_{t-1})
+\end{eqnarray*}
+The $p(e_i|\cdot)$ terms are the hidden state sequence model, but different from and HMM in that the state transitions depend on the words, and the $p(w_t|\cdot)$ terms are the observation model which is an event-dependent language model.
+
+\vskip 0.1in
+
+For many problems in speech processing, it is useful to combine this model with another observation model (e.g. $p(f_t|e_t,w_t)$) that characterizes acoustic information $f_t$.
+
+\vskip 0.1in
+
+The hidden-event language model can be designed with the SRILM toolkit using
+the ``hidden-ngram'' command. 
+
+\end{document} 
+

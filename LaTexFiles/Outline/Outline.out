@@ -1,7 +1,11 @@
-\BOOKMARK [1][-]{section.1}{The Question, The Process}{}% 1
-\BOOKMARK [2][-]{subsection.1.1}{Time Independent Diabetes Predictors}{section.1}% 2
-\BOOKMARK [3][-]{subsubsection.1.1.1}{Data for initial steps}{subsection.1.1}% 3
-\BOOKMARK [3][-]{subsubsection.1.1.2}{Model Fitting}{subsection.1.1}% 4
-\BOOKMARK [2][-]{subsection.1.2}{Initial Test of Time Dependence}{section.1}% 5
-\BOOKMARK [3][-]{subsubsection.1.2.1}{Data}{subsection.1.2}% 6
-\BOOKMARK [3][-]{subsubsection.1.2.2}{Tests}{subsection.1.2}% 7
+\BOOKMARK [1][-]{section.1}{Why Is this Useful? How can we improve on previous Approaches?}{}% 1
+\BOOKMARK [1][-]{section.2}{The Question, The Process}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Time Independent Diabetes Predictors}{section.2}% 3
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Data for initial steps}{subsection.2.1}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Model Fitting}{subsection.2.1}% 5
+\BOOKMARK [3][-]{subsubsection.2.1.3}{Tests}{subsection.2.1}% 6
+\BOOKMARK [2][-]{subsection.2.2}{Initial Test of Time Dependence}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Data}{subsection.2.2}% 8
+\BOOKMARK [3][-]{subsubsection.2.2.2}{Tests}{subsection.2.2}% 9
+\BOOKMARK [3][-]{subsubsection.2.2.3}{Utility}{subsection.2.2}% 10
+\BOOKMARK [1][-]{section.3}{Objectives in 4 steps}{}% 11
