@@ -47,6 +47,15 @@
 
 - What has been done in the past. Find a problem similar to this. What is the best model used so far? Has anyone done this with claims data? It'll probably be logistic regression on a small research cohort. What kind of metrics are they using? AUC and Accuracy? F1 measure?
 
+
+Overview of Claims Data usage:
+\begin{itemize}
+\item Claims Data efficacy: \href{https://www.rand.org/content/dam/rand/pubs/rgs_dissertations/RGSD171/RGSD171.ch2.pdf}{Claims Data efficacy}
+
+\item \href{http://people.csail.mit.edu/rahulgk/papers/nips2013\_workshop.pdf}{Predicting Diabetes, CSAIL MIT}
+
+\end{itemize}
+
 \section{The Question, The Process}
 \doublespacing
 
@@ -66,7 +75,7 @@ We will create a sparse feature matrix across subjects that will indicate the is
 Since the data are quite categorical, and the final conclusion is as well, perhaps a logistic regression or SVM/margin based classifer would be useful for this classification (for soft margin/hard margin info: \href{https://github.com/harvard-ml-courses/cs181-lectures/blob/master/10.handout.pdf}{here}). \begin{itemize}
 
 \item The relative quality of the logistic regression model can be measured with an Akaike information criterion (AIC) for it, defined as: $ \textrm{AIC} = 2k - 2 \ln L$, where k is the number of features and L is the likelihood function. We seek to maximize the log likelihood of the data (for computation purposes this is easier) where L is: \begin{gather}
-\ln L(\mathbf{w} | \mathbf{X}) = \prod_{i} \ln P(y_i |\mathbf{x}_i, \mathbf{w}) = \prod_{i} \ln(\sigma(\mathbf{w},\mathbf{x}_i)^{y_i} (1 - \sigma(\mathbf{w},\mathbf{x}_i))^{1-y_i} ,  \\  \textrm{where}  \quad \sigma(\mathbf{w},\mathbf{x}) = \frac{1}{1 +e^{-\mathbf{w}^T \mathbf{x}}} \qquad
+\ln L(\mathbf{w} | \mathbf{X}) = \prod_{i} \ln P(y_i |\mathbf{x}_i, \mathbf{w}) = \sum_{i} \ln(\sigma(\mathbf{w},\mathbf{x}_i)^{y_i} (1 - \sigma(\mathbf{w},\mathbf{x}_i))^{1-y_i} ,  \\  \textrm{where}  \quad \sigma(\mathbf{w},\mathbf{x}) = \frac{1}{1 +e^{-\mathbf{w}^T \mathbf{x}}} \qquad
 \end{gather}
 
 One can either maximize the this function, or minimize the negative of it, essentially asking how likely are the regression parameters $\mathbf{w}$ given the data $\mathbf{X}$?
@@ -168,5 +177,30 @@ It is important to know if such granularity can be achieved to properly answer a
 
 \item From here, we want to implement the HMM model to qualify the transition probabilities of the four states mentioned in item 2. This is where we want to understand what features most drastically influence these transition probabilities. 
 \end{enumerate}
+
+
+\section{Organizing Our Data}
+
+We want to make a giant database of patients both with diabetes and without, so let's start hashing out the data we want in there.
+
+We have access to the following databases and their sub-fields. We connect them using member ID information or HMSAetnaLineID info to unite diagnoses with procedures/pharma claims:
+\begin{itemize}
+\item Enrollment. We will use this information to select patients with continued coverage across years for when we do the time series aspects of the analysis.
+\begin{itemize}
+\item Effective Date: there monthly to suggest continued enrollment. 
+\item Original Data: when their enrollment originally began (not necessarily tied to displayed periods of continued enrollment).
+\item  DrugIndicator: Drugs or no?
+\item CoverageTypeCode: What type of coverage do they have?
+\end{itemize}
+
+\item FactIcd. All the diagnoses as individual rows for each member. Members can and often will have more than one entry. We are interested in the ICD codes that precede a diabetes ICD or come after it (when do they switch into or out of diabetic state?). 
+\begin{itemize}
+\item ICD - what the diagnoses was. 250.$\%$ will be all diabetes related diagnoses. We will also care about the following list: 780.79 -malaise/fatigue, 728.87 muscle weaknesss, ....CONTINUE THIS.
+\item 
+\end{itemize}
+\item FactProcedure will tell us 
+\end{itemize}
+
+MAKE COLUMNS THAT ARE YES/NO DID THEY HAVE THESE OTHER SYMPTOMS DIAGNOSES BEFOREHAND
 
 \end{document}
